@@ -590,14 +590,12 @@ def run_module():
         # see: http://tracker.ceph.com/issues/36329
         # FIXME: it's probably less confusing to check for rc
 
+        # this module returns 1 because the cmd handles json parse errors
+        # in flight. list_osd must be corrected to fix it.
+
         # convert out to json, ansible returns a string...
-        try:
-            if rc > 0:
-                raise NonZeroReturn
-        except (NonZeroReturn):
-            fatal("Could not decode json output: {} from the command {}. Non Zero return code.".format(out, cmd), module)  # noqa E501
-
-
+        
+        out_dict = {}
         try:
             out_dict = json.loads(out)
         except ValueError:
