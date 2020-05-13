@@ -595,7 +595,7 @@ def run_module():
             out_dict = json.loads(out)
             if rc > 0:
                 raise NonZeroReturn
-        except (ValueError, NonZeroReturn):
+        except (NonZeroReturn):
             fatal("Could not decode json output: {} from the command {}. Non Zero return code.".format(out, cmd), module)  # noqa E501
 
         if out_dict:
