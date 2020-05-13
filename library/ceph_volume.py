@@ -592,12 +592,16 @@ def run_module():
 
         # convert out to json, ansible returns a string...
         try:
-            out_dict = json.loads(out)
             if rc > 0:
                 raise NonZeroReturn
         except (NonZeroReturn):
             fatal("Could not decode json output: {} from the command {}. Non Zero return code.".format(out, cmd), module)  # noqa E501
 
+
+        try:
+            out_dict = json.loads(out)
+        except ValueError:
+            pass
         if out_dict:
             data = module.params['data']
             result['stdout'] = 'skipped, since {0} is already used for an osd'.format(  # noqa E501
