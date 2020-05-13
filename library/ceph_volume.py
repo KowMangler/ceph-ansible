@@ -188,6 +188,9 @@ EXAMPLES = '''
 
 from ansible.module_utils.basic import AnsibleModule  # noqa 4502
 
+class NonZeroReturn(Exception):
+    """Non Zero Return Error"""
+ 
 
 def fatal(message, module):
     '''
@@ -580,7 +583,7 @@ def run_module():
         # First test if the device has Ceph LVM Metadata
         rc, cmd, out, err = exec_command(
             module, list_osd(module, container_image))
-
+            
         # list_osd returns a dict, if the dict is empty this means
         # we can not check the return code since it's not consistent
         # with the plain output
@@ -590,8 +593,10 @@ def run_module():
         # convert out to json, ansible returns a string...
         try:
             out_dict = json.loads(out)
-        except ValueError:
-            fatal("Could not decode json output: {} from the command {}".format(out, cmd), module)  # noqa E501
+            if rc > 0:
+                raise NonZeroReturn
+        except (ValueError, NonZeroReturn):
+            fatal("Could not decode json output: {} from the command {}. Non Zero return code.".format(out, cmd), module)  # noqa E501
 
         if out_dict:
             data = module.params['data']
